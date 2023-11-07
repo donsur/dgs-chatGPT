@@ -9,7 +9,7 @@ import uuid from 'react-uuid';
 
 import styles from "./Chat.module.css";
 import Azure from "../../assets/Azure.svg";
-import DGS from "../../assets/DGS Square.jpg"
+import DGS from "../../assets/DGS_60_year_logo.png"
 
 import {
     ChatMessage,
