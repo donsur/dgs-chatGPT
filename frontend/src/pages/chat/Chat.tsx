@@ -9,7 +9,7 @@ import uuid from 'react-uuid';
 
 import styles from "./Chat.module.css";
 import Azure from "../../assets/Azure.svg";
-import DGS from "../../assets/DGS_60_year_logo.png"
+import DGS from "../../assets/DGS Square.jpg"
 
 import {
     ChatMessage,
@@ -556,8 +556,8 @@ const Chat = () => {
                                     className={styles.chatIcon}
                                     aria-hidden="true"
                                 />
-                                <h1 className={styles.chatEmptyStateTitle}>DGS AI Chat</h1>
-                                <h2 className={styles.chatEmptyStateSubtitle}>This chatbot is configured to answer your questions related to business.</h2>
+                                <h1 className={styles.chatEmptyStateTitle}>DGS AI Chat on SCM</h1>
+                                <h2 className={styles.chatEmptyStateSubtitle}>This chatbot is configured to answer your questions related to State Contracting Manuals.</h2>
                             </Stack>
                         ) : (
                             <div className={styles.chatMessageStream} style={{ marginBottom: isLoading ? "40px" : "0px"}} role="log">
