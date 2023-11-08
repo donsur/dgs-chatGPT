@@ -6,7 +6,6 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from 'remark-gfm'
 import rehypeRaw from "rehype-raw";
 import uuid from 'react-uuid';
-import { isEmpty } from "lodash-es";
 
 import styles from "./Chat.module.css";
 import Azure from "../../assets/Azure.svg";
@@ -69,8 +68,6 @@ const Chat = () => {
         styles: { main: { maxWidth: 450 } },
     }
 
-    const [ASSISTANT, TOOL, ERROR] = ["assistant", "tool", "error"]
-
     useEffect(() => {
         if(appStateContext?.state.isCosmosDBAvailable?.status === CosmosDBStatus.NotWorking && appStateContext.state.chatHistoryLoadingState === ChatHistoryLoadingState.Fail && hideErrorDialog){
             let subtitle = `${appStateContext.state.isCosmosDBAvailable.status}. Please contact the site administrator.`
@@ -96,30 +93,6 @@ const Chat = () => {
         }
         else {
             setShowAuthMessage(false);
-        }
-    }
-
-    let assistantMessage = {} as ChatMessage
-    let toolMessage = {} as ChatMessage
-    let assistantContent = ""
-
-    const processResultMessage = (resultMessage: ChatMessage, userMessage: ChatMessage, conversationId?: string) => {
-        if (resultMessage.role === ASSISTANT) {
-            assistantContent += resultMessage.content
-            assistantMessage = resultMessage
-            assistantMessage.content = assistantContent
-        }
-
-        if (resultMessage.role === TOOL) toolMessage = resultMessage
-
-        if (!conversationId) {
-            isEmpty(toolMessage) ?
-                setMessages([...messages, userMessage, assistantMessage]) :
-                setMessages([...messages, userMessage, toolMessage, assistantMessage]);
-        } else {
-            isEmpty(toolMessage) ?
-                setMessages([...messages, assistantMessage]) :
-                setMessages([...messages, toolMessage, assistantMessage]);
         }
     }
 
@@ -161,7 +134,8 @@ const Chat = () => {
         setMessages(conversation.messages)
         
         const request: ConversationRequest = {
-            messages: [...conversation.messages.filter((answer) => answer.role !== ERROR)]
+            messages: [...conversation.messages.filter((answer) => answer.role !== "error")]
+            // messages: [...conversation.messages.filter((answer) => answer.role === "error")]
         };
 
         let result = {} as ChatResponse;
@@ -187,17 +161,19 @@ const Chat = () => {
                                 obj.date = new Date().toISOString();
                             })
                             setShowLoadingMessage(false);
-                            result.choices[0].messages.forEach((resultObj) => {
-                                processResultMessage(resultObj, userMessage, conversationId);
-                            })
+                            if(!conversationId){
+                                setMessages([...messages, userMessage, ...result.choices[0].messages]);
+                            }else{
+                                setMessages([...messages, ...result.choices[0].messages]);
+                            }
                             runningText = "";
                         }
                         catch { }
                     });
                 }
-                conversation.messages.push(toolMessage, assistantMessage)
+                conversation.messages.push(...result.choices[0].messages)
                 appStateContext?.dispatch({ type: 'UPDATE_CURRENT_CHAT', payload: conversation });
-                setMessages([...messages, toolMessage, assistantMessage]);
+                setMessages([...messages, ...result.choices[0].messages]);
             }
             
         } catch ( e )  {
@@ -211,7 +187,7 @@ const Chat = () => {
                 }
                 let errorChatMsg: ChatMessage = {
                     id: uuid(),
-                    role: ERROR,
+                    role: "error",
                     content: errorMessage,
                     date: new Date().toISOString()
                 }
@@ -258,12 +234,12 @@ const Chat = () => {
             }else{
                 conversation.messages.push(userMessage);
                 request = {
-                    messages: [...conversation.messages.filter((answer) => answer.role !== ERROR)]
+                    messages: [...conversation.messages.filter((answer) => answer.role !== "error")]
                 };
             }
         }else{
             request = {
-                messages: [userMessage].filter((answer) => answer.role !== ERROR)
+                messages: [userMessage].filter((answer) => answer.role !== "error")
             };
             setMessages(request.messages)
         }
@@ -273,7 +249,7 @@ const Chat = () => {
             if(!response?.ok){
                 let errorChatMsg: ChatMessage = {
                     id: uuid(),
-                    role: ERROR,
+                    role: "error",
                     content: "There was an error generating a response. Chat history can't be saved at this time. If the problem persists, please contact the site administrator.",
                     date: new Date().toISOString()
                 }
@@ -319,9 +295,11 @@ const Chat = () => {
                                 obj.date = new Date().toISOString();
                             })
                             setShowLoadingMessage(false);
-                            result.choices[0].messages.forEach((resultObj) => {
-                                processResultMessage(resultObj, userMessage, conversationId);
-                            })
+                            if(!conversationId){
+                                setMessages([...messages, userMessage, ...result.choices[0].messages]);
+                            }else{
+                                setMessages([...messages, ...result.choices[0].messages]);
+                            }
                             runningText = "";
                         }
                         catch { }
@@ -338,7 +316,7 @@ const Chat = () => {
                         abortFuncs.current = abortFuncs.current.filter(a => a !== abortController);
                         return;
                     }
-                    resultConversation.messages.push(toolMessage, assistantMessage)
+                    resultConversation.messages.push(...result.choices[0].messages);
                 }else{
                     resultConversation = {
                         id: result.history_metadata.conversation_id,
@@ -346,7 +324,7 @@ const Chat = () => {
                         messages: [userMessage],
                         date: result.history_metadata.date
                     }
-                    resultConversation.messages.push(toolMessage, assistantMessage)
+                    resultConversation.messages.push(...result.choices[0].messages);
                 }
                 if(!resultConversation){
                     setIsLoading(false);
@@ -355,7 +333,7 @@ const Chat = () => {
                     return;
                 }
                 appStateContext?.dispatch({ type: 'UPDATE_CURRENT_CHAT', payload: resultConversation });
-                setMessages([...messages, toolMessage, assistantMessage]);
+                setMessages([...messages, ...result.choices[0].messages]);
             }
             
         } catch ( e )  {
@@ -369,7 +347,7 @@ const Chat = () => {
                 }
                 let errorChatMsg: ChatMessage = {
                     id: uuid(),
-                    role: ERROR,
+                    role: "error",
                     content: errorMessage,
                     date: new Date().toISOString()
                 }
@@ -459,6 +437,7 @@ const Chat = () => {
 
     useEffect(() => {
         if (appStateContext?.state.currentChat) {
+
             setMessages(appStateContext.state.currentChat.messages)
         }else{
             setMessages([])
@@ -483,7 +462,7 @@ const Chat = () => {
                             let errorMessage = "An error occurred. Answers can't be saved at this time. If the problem persists, please contact the site administrator.";
                             let errorChatMsg: ChatMessage = {
                                 id: uuid(),
-                                role: ERROR,
+                                role: "error",
                                 content: errorMessage,
                                 date: new Date().toISOString()
                             }
@@ -597,7 +576,7 @@ const Chat = () => {
                                                     }}
                                                     onCitationClicked={c => onShowCitation(c)}
                                                 />
-                                            </div> : answer.role === ERROR ? <div className={styles.chatMessageError}>
+                                            </div> : answer.role === "error" ? <div className={styles.chatMessageError}>
                                                 <Stack horizontal className={styles.chatMessageErrorContent}>
                                                     <ErrorCircleRegular className={styles.errorIcon} style={{color: "rgba(182, 52, 67, 1)"}} />
                                                     <span>Error</span>
