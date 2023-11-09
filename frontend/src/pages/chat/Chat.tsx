@@ -85,7 +85,11 @@ const Chat = () => {
             setErrorMsg(null)
         }, 500);
     }
-    
+
+    useEffect(() => {
+       setIsLoading(appStateContext?.state.chatHistoryLoadingState === ChatHistoryLoadingState.Loading)
+    }, [appStateContext?.state.chatHistoryLoadingState])
+
     const getUserInfoList = async () => {
         const userInfoList = await getUserInfo();
         if (userInfoList.length === 0 && window.location.hostname !== "127.0.0.1") {
@@ -556,8 +560,8 @@ const Chat = () => {
                                     className={styles.chatIcon}
                                     aria-hidden="true"
                                 />
-                                <h1 className={styles.chatEmptyStateTitle}>DGS AI Chat on SCM</h1>
-                                <h2 className={styles.chatEmptyStateSubtitle}>This chatbot is configured to answer your questions related to State Contracting Manuals.</h2>
+                                <h1 className={styles.chatEmptyStateTitle}>DGS AI Chat</h1>
+                                <h2 className={styles.chatEmptyStateSubtitle}>This chatbot is here to help with your business questions.</h2>
                             </Stack>
                         ) : (
                             <div className={styles.chatMessageStream} style={{ marginBottom: isLoading ? "40px" : "0px"}} role="log">
