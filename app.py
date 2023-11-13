@@ -305,15 +305,15 @@ def formatApiResponseStreaming(rawResponse):
         }],
     }
 
-    if rawResponse["choices"][0]["delta"].get("context"):
+    if rawResponse["choices"][0]["messages"][0]["delta"].get("context"):
         messageObj = {
             "delta": {
                 "role": "tool",
-                "content": rawResponse["choices"][0]["delta"]["context"]["messages"][0]["content"]
+                "content": rawResponse["choices"][0]["messages"][0]["delta"]["context"]["messages"][0]["content"]
             }
         }
         response["choices"][0]["messages"].append(messageObj)
-    elif rawResponse["choices"][0]["delta"].get("role"):
+    elif rawResponse["choices"][0]["messages"][0]["delta"].get("role"):
         messageObj = {
             "delta": {
                 "role": "assistant",
@@ -321,7 +321,7 @@ def formatApiResponseStreaming(rawResponse):
         }
         response["choices"][0]["messages"].append(messageObj)
     else:
-        if rawResponse["choices"][0]["end_turn"]:
+        if rawResponse["choices"][0]["messages"][0]["end_turn"]:
             messageObj = {
                 "delta": {
                     "content": "[DONE]",
@@ -331,7 +331,7 @@ def formatApiResponseStreaming(rawResponse):
         else:
             messageObj = {
                 "delta": {
-                    "content": rawResponse["choices"][0]["delta"]["content"],
+                    "content": rawResponse["choices"][0]["messages"][0]["delta"]["content"],
                 }
             }
             response["choices"][0]["messages"].append(messageObj)
@@ -363,7 +363,7 @@ def stream_without_data(response, history_metadata={}):
     responseText = ""
     for line in response:
         if line["choices"]:
-            deltaText = line["choices"][0]["delta"].get('content')
+            deltaText = line["choices"][0]["messages"][0]["delta"].get('content')
         else:
             deltaText = ""
         if deltaText and deltaText != "[DONE]":
@@ -400,11 +400,10 @@ def conversation_without_data(request_body):
     ]
 
     for message in request_messages:
-        if message:
-            messages.append({
-                "role": message["role"] ,
-                "content": message["content"]
-            })
+        messages.append({
+            "role": message["role"] ,
+            "content": message["content"]
+        })
 
     response = openai.ChatCompletion.create(
         engine=AZURE_OPENAI_MODEL,
@@ -521,7 +520,7 @@ def update_conversation():
         ## then write it to the conversation history in cosmos
         messages = request.json["messages"]
         if len(messages) > 0 and messages[-1]['role'] == "assistant":
-            if len(messages) > 1 and messages[-2] != {} and messages[-2]['role'] == "tool":
+            if len(messages) > 1 and messages[-2]['role'] == "tool":
                 # write the tool message first
                 cosmos_conversation_client.create_message(
                     conversation_id=conversation_id,
