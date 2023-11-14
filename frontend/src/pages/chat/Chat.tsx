@@ -10,7 +10,7 @@ import { isEmpty } from "lodash-es";
 
 import styles from "./Chat.module.css";
 import Azure from "../../assets/Azure.svg";
-import DGS from "../../assets/DGS_60_year_logo.png"
+import DGS from "../../assets/DGS_60_year_logo.png";
 
 import {
     ChatMessage,
@@ -581,7 +581,7 @@ const Chat = () => {
                                     aria-hidden="true"
                                 />
                                 <h1 className={styles.chatEmptyStateTitle}>DGS AI Chat</h1>
-                                <h2 className={styles.chatEmptyStateSubtitle}>This chatbot is here to help with your business questions</h2>
+                                <h2 className={styles.chatEmptyStateSubtitle}>This chatbot is configured to answer your business related questions</h2>
                             </Stack>
                         ) : (
                             <div className={styles.chatMessageStream} style={{ marginBottom: isLoading ? "40px" : "0px"}} role="log">
