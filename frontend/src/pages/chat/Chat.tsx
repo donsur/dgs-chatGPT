@@ -581,7 +581,7 @@ const Chat = () => {
                                     aria-hidden="true"
                                 />
                                 <h1 className={styles.chatEmptyStateTitle}>PD AI Chat</h1>
-                                <h2 className={styles.chatEmptyStateSubtitle}>This chatbot is configured to answer your questions on the State Administrative Manual (SAM) and State Contracting Manual (SCM). <br />
+                                <h2 className={styles.chatEmptyStateSubtitle}>This chatbot is configured to answer your questions on the State Administrative Manual (SAM) and State Contracting Manual (SCM). <br /><br />
                                     Please note, this tool may occasionally provide outdated or incorrect data. <br />
                                     Ensure to verify the information and use it judiciously in professional settings.
                                 </h2>
