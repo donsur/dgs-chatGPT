@@ -66,4 +66,4 @@ jobs:
         with:
           app-name: 'pdchatdev'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_69EE8ED915FE4DE5865C760151FD0E36 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_74D9BBE346194D69879A696CFECC333C }}
