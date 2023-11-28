@@ -582,8 +582,8 @@ const Chat = () => {
                                 />
                                 <h1 className={styles.chatEmptyStateTitle}>PD AI Chat</h1>
                                 <h2 className={styles.chatEmptyStateSubtitle}>This chatbot is configured to answer your questions on the State Administrative Manual (SAM) and State Contracting Manual (SCM). <br /><br />
-                                    Please note, this tool may occasionally provide outdated or incorrect data. <br />
-                                    Ensure to verify the information and use it judiciously in professional settings.
+                                    Please note, this tool may provide outdated or incorrect data. <br />
+                                    The onus is on you to confirm the accuracy of the information and use it prudently in professional settings.
                                 </h2>
                             </Stack>
                         ) : (
